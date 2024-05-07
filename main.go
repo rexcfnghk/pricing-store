@@ -15,7 +15,7 @@ func main() {
 	router.Get("/hello", basicHandler)
 
 	server := &http.Server{
-		Addr: ":3000",
+		Addr:    ":3000",
 		Handler: router,
 	}
 
