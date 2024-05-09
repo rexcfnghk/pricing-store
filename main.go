@@ -14,7 +14,7 @@ import (
 func main() {
 	appConfig := readAppConfig()
 
-	app := application.New()
+	app := application.New(appConfig)
 
 	err := app.Start(context.TODO())
 	if err != nil {
