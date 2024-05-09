@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 
 	"github.com/rexcfnghk/pricing-store/application"
 	"github.com/rexcfnghk/pricing-store/config"
@@ -16,7 +17,10 @@ func main() {
 
 	app := application.New(appConfig)
 
-	err := app.Start(context.TODO())
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	err := app.Start(ctx)
 	if err != nil {
 		fmt.Println("failed to start app: ", err)
 	}
