@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./seed-data/:/seed-data:ro
+    # command: redis-cli -h redis < /seed-data/seed.redis

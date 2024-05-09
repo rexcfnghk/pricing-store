@@ -4,11 +4,14 @@
 
 A simple implementation of a trade pricing store
 
-## Installation
+## Dependencies
 
-1. Set up a Redis instance
-2. Modify `config.json` to match the connection details to your Redis instance
-3. `go run main.go`
+- Docker
+
+## Installation for local development
+
+1. `docker-compose up` (this builds and deploys up a local Redis container and the pricing store API container)
+2. `docker exec pricing-store-redis-1 sh -c "redis-cli < /seed-data/seed.redis"` (this seeds the Redis data store with dummy data, to be automated)
 
 ## Endpoints exposed
 

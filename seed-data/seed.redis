@@ -1,0 +1,11 @@
+SADD providers 1:GoldenDragonExchange
+SADD providers 2:HKExchange
+
+SADD currencypairs base:BTC:quote:USD
+SADD currencypairs base:USD:quote:BTC
+
+SADD providercurrencyconfigs 1:BTC:USD:1
+SADD providercurrencyconfigs 1:USD:BTC:0
+
+SADD customers 1:0.8
+SADD customers 2:1.2
