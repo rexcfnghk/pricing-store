@@ -1,0 +1,7 @@
+{
+    "datastore": {
+        "host": "localhost:6379",
+        "username": "",
+        "password": ""
+    }
+}
