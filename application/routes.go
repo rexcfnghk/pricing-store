@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rexcfnghk/pricing-store/handler"
+	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 )
@@ -30,6 +31,9 @@ func (a *App) loadQuoteRoutes(router chi.Router) {
 			Client: a.rdb,
 		},
 		ProviderRepo: &provider.RedisRepo{
+			Client: a.rdb,
+		},
+		CurrencyMappingRepo: &currencymapping.RedisRepo{
 			Client: a.rdb,
 		},
 	}

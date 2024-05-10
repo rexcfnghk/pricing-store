@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,14 +10,16 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rexcfnghk/pricing-store/model"
+	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 	"github.com/shopspring/decimal"
 )
 
 type Quote struct {
-	QuoteRepo    *quote.RedisRepo
-	ProviderRepo *provider.RedisRepo
+	QuoteRepo           *quote.RedisRepo
+	ProviderRepo        *provider.RedisRepo
+	CurrencyMappingRepo *currencymapping.RedisRepo
 }
 
 type QuoteBodyModel struct {
@@ -50,11 +53,24 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var quotes []model.MarketQuote
+	var errs []error
 	for _, b := range body {
-		quotes = append(quotes, mapToQuote(marketProviderId, b))
+		quote, err := h.mapToQuote(r.Context(), marketProviderId, b)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+
+		quotes = append(quotes, quote)
+	}
+	if len(errs) > 0 {
+		fmt.Println("failed to map some quotes into curreny pairs: ", errs)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("failed to map some quotes into curreny pairs"))
+		return
 	}
 
-	errs := h.QuoteRepo.Insert(r.Context(), quotes)
+	errs = h.QuoteRepo.Insert(r.Context(), quotes)
 	if len(errs) > 0 {
 		fmt.Println("failed to insert some elemments: ", errs)
 		w.WriteHeader(http.StatusOK)
@@ -65,19 +81,21 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func mapToQuote(marketProviderId int, body QuoteBodyModel) model.MarketQuote {
+func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body QuoteBodyModel) (model.MarketQuote, error) {
+	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(ctx, body.Base, body.Quote)
+	if err != nil {
+		return model.MarketQuote{}, fmt.Errorf("get currency pair: %w", err)
+	}
+
 	quote := model.MarketQuote{
-		BidPrice:    body.BidPrice,
-		BidQuantity: body.BidQuantity,
-		AskPrice:    body.AskPrice,
-		AskQuantity: body.AskQuantity,
-		CurrencyPair: model.CurrencyPair{
-			Base:  body.Base,
-			Quote: body.Quote,
-		},
+		BidPrice:         body.BidPrice,
+		BidQuantity:      body.BidQuantity,
+		AskPrice:         body.AskPrice,
+		AskQuantity:      body.AskQuantity,
+		CurrencyPairId:   currencyMappingId,
 		Timestamp:        body.Timestamp,
 		MarketProviderId: marketProviderId,
 	}
 
-	return quote
+	return quote, nil
 }

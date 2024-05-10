@@ -12,8 +12,8 @@ type MarketQuote struct {
 	AskPrice         decimal.Decimal `json:"askPrice"`
 	AskQuantity      decimal.Decimal `json:"askQuantity"`
 	Timestamp        time.Time       `json:"timestamp"`
-	CurrencyPair     CurrencyPair
-	MarketProviderId int
+	MarketProviderId int             `json:"marketProviderId"`
+	CurrencyPairId   int
 }
 
 type CurrencyPair struct {

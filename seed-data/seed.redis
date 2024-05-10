@@ -1,8 +1,8 @@
 SET providers:1 '{"name":"GoldenDragonExchange"}'
 SET providers:2 '{"name":"HKExchange"}'
 
-SET currencypairs:1 '{"base":"BTC","quote":"USD"}'
-SET currencypairs:2 '{"base":"USD","quote":"BTC"}'
+SET currencypairs:BTC:USD 1
+SET currencypairs:USD:BTC 2
 
 SET providercurrencyconfigs:1:1 '{"isEnabled":true}'
 SET providercurrencyconfigs:1:2 '{"isEnabled":false}'
