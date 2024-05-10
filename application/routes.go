@@ -25,7 +25,7 @@ func (a *App) loadRoutes() {
 
 func (a *App) loadQuoteRoutes(router chi.Router) {
 	quoteHandler := &handler.Quote{
-		Repo: &quote.RedisRepo{
+		QuoteRepo: &quote.RedisRepo{
 			Client: a.rdb,
 		},
 	}

@@ -9,12 +9,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rexcfnghk/pricing-store/model"
+	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 	"github.com/shopspring/decimal"
 )
 
 type Quote struct {
-	Repo *quote.RedisRepo
+	QuoteRepo    *quote.RedisRepo
+	ProviderRepo *provider.RedisRepo
 }
 
 type QuoteBodyModel struct {
@@ -41,12 +43,18 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err = h.ProviderRepo.GetById(r.Context(), marketProviderId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	var quotes []model.MarketQuote
 	for _, b := range body {
 		quotes = append(quotes, mapToQuote(marketProviderId, b))
 	}
 
-	errs := h.Repo.Insert(r.Context(), quotes)
+	errs := h.QuoteRepo.Insert(r.Context(), quotes)
 	if len(errs) > 0 {
 		fmt.Println("failed to insert some elemments: ", errs)
 		w.WriteHeader(http.StatusOK)

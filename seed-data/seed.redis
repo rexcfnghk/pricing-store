@@ -1,11 +1,11 @@
-SADD providers 1:GoldenDragonExchange
-SADD providers 2:HKExchange
+JSON.SET providers:1 $ '{"name":"GoldenDragonExchange"}'
+JSON.SET providers:2 $ '{"name":"HKExchange"}'
 
-SADD currencypairs base:BTC:quote:USD
-SADD currencypairs base:USD:quote:BTC
+JSON.SET currencypairs:1 $ '{"base":"BTC","quote":"USD"}'
+JSON.SET currencypairs:2 $ '{"base":"USD","quote":"BTC"}'
 
-SADD providercurrencyconfigs 1:BTC:USD:1
-SADD providercurrencyconfigs 1:USD:BTC:0
+JSON.SET providercurrencyconfigs:1:1 $ '{"isEnabled":true}'
+JSON.SET providercurrencyconfigs:1:2 $ '{"isEnabled":false}'
 
-SADD customers 1:0.8
-SADD customers 2:1.2
+JSON.SET customers:1 $ '{"ratingFactor":0.8}'
+JSON.SET customers:2 $ '{"ratingFactor":1.2}'
