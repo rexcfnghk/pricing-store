@@ -17,13 +17,14 @@ type App struct {
 
 func New(appConfig *config.AppConfig) *App {
 	app := &App{
-		router: loadRoutes(),
 		rdb: redis.NewClient(&redis.Options{
 			Addr:     appConfig.Datastore.Host,
 			Username: appConfig.Datastore.Username,
 			Password: appConfig.Datastore.Password,
 		}),
 	}
+
+	app.loadRoutes()
 
 	return app
 }

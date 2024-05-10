@@ -6,9 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rexcfnghk/pricing-store/handler"
+	"github.com/rexcfnghk/pricing-store/repository/quote"
 )
 
-func loadRoutes() *chi.Mux {
+func (a *App) loadRoutes() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
@@ -17,13 +18,17 @@ func loadRoutes() *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/quotes", loadQuoteRoutes)
+	router.Route("/providers", a.loadQuoteRoutes)
 
-	return router
+	a.router = router
 }
 
-func loadQuoteRoutes(router chi.Router) {
-	quoteHandler := &handler.Quote{}
+func (a *App) loadQuoteRoutes(router chi.Router) {
+	quoteHandler := &handler.Quote{
+		Repo: &quote.RedisRepo{
+			Client: a.rdb,
+		},
+	}
 
-	router.Post("/", quoteHandler.Create)
+	router.Post("/{id}/quotes", quoteHandler.Create)
 }

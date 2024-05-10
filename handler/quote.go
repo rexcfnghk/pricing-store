@@ -12,5 +12,5 @@ type Quote struct {
 }
 
 func (o *Quote) Create(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Create an order")
+	fmt.Println("Create a quote")
 }
