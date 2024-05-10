@@ -8,6 +8,7 @@ import (
 	"github.com/rexcfnghk/pricing-store/handler"
 	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
+	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 )
 
@@ -20,23 +21,39 @@ func (a *App) loadRoutes() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/providers", a.loadQuoteRoutes)
+	router.Route("/providers", a.loadProviderRoutes)
 
 	a.router = router
 }
 
-func (a *App) loadQuoteRoutes(router chi.Router) {
+func (a *App) loadProviderRoutes(router chi.Router) {
+	quoteRedisRepo := &quote.RedisRepo{
+		Client: a.rdb,
+	}
+
+	providerRedisRepo := &provider.RedisRepo{
+		Client: a.rdb,
+	}
+	currencyMappingRedisRepo := &currencymapping.RedisRepo{
+		Client: a.rdb,
+	}
+	providerCurrencyConfigRedisRepo := &providercurrencyconfig.RedisRepo{
+		Client: a.rdb,
+	}
+
 	quoteHandler := &handler.Quote{
-		QuoteRepo: &quote.RedisRepo{
-			Client: a.rdb,
-		},
-		ProviderRepo: &provider.RedisRepo{
-			Client: a.rdb,
-		},
-		CurrencyMappingRepo: &currencymapping.RedisRepo{
-			Client: a.rdb,
-		},
+		QuoteRepo:           quoteRedisRepo,
+		ProviderRepo:        providerRedisRepo,
+		CurrencyMappingRepo: currencyMappingRedisRepo,
+	}
+
+	providerHandler := &handler.Provider{
+		ProviderRepo:               providerRedisRepo,
+		CurrencyMappingRepo:        currencyMappingRedisRepo,
+		ProviderCurrencyConfigRepo: providerCurrencyConfigRedisRepo,
 	}
 
 	router.Post("/{id}/quotes", quoteHandler.Create)
+
+	router.Get("/{id}/providercurrencyconfig", providerHandler.GetCurrencyConfigByCurrencyPair)
 }
