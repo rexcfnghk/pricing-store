@@ -16,11 +16,12 @@ A simple implementation of a trade pricing store
 ## Endpoints exposed
 
 - [x] `POST /providers/{id}/quotes` Inserts quote prices into the system for a provider
-- [x] `GET /providers/{id}/currencyconfigs` Retrieves currency pair setting for a provider
-- [ ] `PUT /providers/{id}/currencyconfigs` Updates currency pair setting for a provider
+- [x] `GET /providers/{id}/currencyconfig` Retrieves currency pair setting for a provider
+- [x] `PUT /providers/{id}/currencyconfig` Updates currency pair setting for a provider
 
 ## Things to improve on
 
+- [ ] Add Postman scripts for easier testing
 - [ ] Lack of tests
 - [ ] Code duplication in some areas
 - [ ] Lack of sufficient syntax knowledge to construct better abstractions and achieve inversion of control

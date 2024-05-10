@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rexcfnghk/pricing-store/model"
 	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
@@ -49,7 +50,6 @@ func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// TODO: Use currency mapping id to find provider currency config
 	providercurrencyconfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), marketProviderId, currencyMappingId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -64,5 +64,51 @@ func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 	}
 
 	w.Write(res)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Provider) PutCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	marketProviderId, err := strconv.Atoi(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	base, quote := r.URL.Query().Get("base"), r.URL.Query().Get("quote")
+	if base == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if quote == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	_, err = h.ProviderRepo.GetById(r.Context(), marketProviderId)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var body model.ProviderCurrencyConfig
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.ProviderCurrencyConfigRepo.UpdateById(r.Context(), marketProviderId, currencyMappingId, body)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }

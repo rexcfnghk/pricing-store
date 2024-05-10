@@ -36,3 +36,19 @@ func (r *RedisRepo) GetById(ctx context.Context, providerId int, currencyPairId 
 
 	return providerCurrencyConfig, nil
 }
+
+func (r *RedisRepo) UpdateById(ctx context.Context, providerId int, currencyPairId int, config model.ProviderCurrencyConfig) error {
+	data, err := json.Marshal(config)
+	if err != nil {
+		return fmt.Errorf("failed to encode providerCurrencyConfig: %w", err)
+	}
+
+	key := providerCurrencyConfigKey(providerId, currencyPairId)
+
+	res := r.Client.Set(ctx, key, data, 0)
+	if err := res.Err(); err != nil {
+		return fmt.Errorf("failed to set: %w", err)
+	}
+
+	return nil
+}
