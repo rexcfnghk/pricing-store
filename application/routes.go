@@ -17,17 +17,13 @@ func loadRoutes() *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/orders", loadOrderRoutes)
+	router.Route("/quotes", loadQuoteRoutes)
 
 	return router
 }
 
-func loadOrderRoutes(router chi.Router) {
-	orderHandler := &handler.Order{}
+func loadQuoteRoutes(router chi.Router) {
+	quoteHandler := &handler.Quote{}
 
-	router.Post("/", orderHandler.Create)
-	router.Get("/", orderHandler.List)
-	router.Get("/{id}", orderHandler.GetById)
-	router.Put("/{id}", orderHandler.UpdateById)
-	router.Delete("/{id}", orderHandler.DeleteById)
+	router.Post("/", quoteHandler.Create)
 }
