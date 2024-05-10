@@ -14,7 +14,7 @@ type RedisRepo struct {
 }
 
 func quoteIdKey(quote model.MarketQuote) string {
-	return fmt.Sprintf("quote:%d", quote.CurrencyPairId)
+	return fmt.Sprintf("quotes:%d", quote.CurrencyPairId)
 }
 
 func (r *RedisRepo) Insert(ctx context.Context, quotes []model.MarketQuote) []error {
