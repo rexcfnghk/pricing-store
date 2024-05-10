@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rexcfnghk/pricing-store/handler"
+	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 )
 
@@ -26,6 +27,9 @@ func (a *App) loadRoutes() {
 func (a *App) loadQuoteRoutes(router chi.Router) {
 	quoteHandler := &handler.Quote{
 		QuoteRepo: &quote.RedisRepo{
+			Client: a.rdb,
+		},
+		ProviderRepo: &provider.RedisRepo{
 			Client: a.rdb,
 		},
 	}
