@@ -13,6 +13,7 @@ import (
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
+	"github.com/rexcfnghk/pricing-store/service"
 )
 
 func (a *App) loadRoutes() {
@@ -46,6 +47,12 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 	customerRedisRepo := &customer.RedisRepo{
 		Client: a.rdb,
 	}
+	bestPriceService := &service.BestPriceService{
+		CurrencyPairRepo:           currencyPairRedisRepo,
+		ProviderCurrencyConfigRepo: providerCurrencyConfigRedisRepo,
+		CustomerRepo:               customerRedisRepo,
+		QuoteRepo:                  quoteRedisRepo,
+	}
 
 	quoteHandler := &handler.Quote{
 		QuoteRepo:        quoteRedisRepo,
@@ -57,14 +64,17 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 		ProviderRepo:               providerRedisRepo,
 		CurrencyPairRepo:           currencyPairRedisRepo,
 		ProviderCurrencyConfigRepo: providerCurrencyConfigRedisRepo,
-		CustomerRepo:               customerRedisRepo,
-		QuoteRepo:                  quoteRedisRepo,
+		BestPriceService:           bestPriceService,
+	}
+
+	bestPriceMiddleware := &custommiddleware.BestPrice{
+		BestPriceService: bestPriceService,
 	}
 
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(a.tokenAuth))
 		r.Use(jwtauth.Authenticator(a.tokenAuth))
-		r.Use(custommiddleware.LogBestPrice)
+		r.Use(bestPriceMiddleware.LogBestPrice)
 		r.Get("/bestprice", providerHandler.GetBestPrice)
 	})
 
