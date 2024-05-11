@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/model"
 	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
@@ -111,4 +112,9 @@ func (h *Provider) PutCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["sub"])))
 }

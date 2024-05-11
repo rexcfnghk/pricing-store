@@ -3,5 +3,8 @@
         "host": "redis:6379",
         "username": "",
         "password": ""
+    },
+    "jwt": {
+        "secret": "secret"
     }
 }

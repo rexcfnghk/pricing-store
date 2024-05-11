@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/handler"
 	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
@@ -52,6 +53,12 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 		CurrencyMappingRepo:        currencyMappingRedisRepo,
 		ProviderCurrencyConfigRepo: providerCurrencyConfigRedisRepo,
 	}
+
+	router.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(a.tokenAuth))
+		r.Use(jwtauth.Authenticator(a.tokenAuth))
+		r.Get("/bestprice", providerHandler.GetBestPrice)
+	})
 
 	router.Post("/{id}/quotes", quoteHandler.Create)
 

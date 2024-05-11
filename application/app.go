@@ -6,13 +6,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/rexcfnghk/pricing-store/config"
 )
 
 type App struct {
-	router http.Handler
-	rdb    *redis.Client
+	router    http.Handler
+	rdb       *redis.Client
+	tokenAuth *jwtauth.JWTAuth
 }
 
 func New(appConfig *config.AppConfig) *App {
@@ -22,8 +24,8 @@ func New(appConfig *config.AppConfig) *App {
 			Username: appConfig.Datastore.Username,
 			Password: appConfig.Datastore.Password,
 		}),
+		tokenAuth: jwtauth.New("HS256", []byte(appConfig.Jwt.Secret), nil),
 	}
-
 	app.loadRoutes()
 
 	return app
