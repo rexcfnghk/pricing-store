@@ -55,6 +55,6 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 
 	router.Post("/{id}/quotes", quoteHandler.Create)
 
-	router.Get("/{id}/providercurrencyconfig", providerHandler.GetCurrencyConfigByCurrencyPair)
-	router.Put("/{id}/providercurrencyconfig", providerHandler.PutCurrencyConfigByCurrencyPair)
+	router.Get("/{id}/providercurrencyconfigs", providerHandler.GetCurrencyConfigByCurrencyPair)
+	router.Put("/{id}/providercurrencyconfigs", providerHandler.PutCurrencyConfigByCurrencyPair)
 }

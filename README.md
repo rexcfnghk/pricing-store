@@ -16,8 +16,12 @@ A simple implementation of a trade pricing store
 ## Endpoints exposed
 
 - [x] `POST /providers/{id}/quotes` Inserts quote prices into the system for a provider
-- [x] `GET /providers/{id}/currencyconfig` Retrieves currency pair setting for a provider
-- [x] `PUT /providers/{id}/currencyconfig` Updates currency pair setting for a provider
+- [x] `GET /providers/{id}/currencyconfigs?base={baseCurrency}&quote={quoteCurrency}` Retrieves currency pair setting for a provider
+- [x] `PUT /providers/{id}/currencyconfigs?base={baseCurrency}&quote={quoteCurrency}` Updates currency pair setting for a provider
+
+## Assumptions
+
+- Provider IDs are known to the caller and are provided as URL parameters
 
 ## Things to improve on
 
