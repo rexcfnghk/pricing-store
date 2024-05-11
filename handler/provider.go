@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ahmetb/go-linq/v3"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/model"
@@ -138,7 +139,6 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	currencyPairId, err := h.CurrencyPairRepo.GetByCurrencyPairId(r.Context(), base, quote)
-	// TODO: Handle no quotes
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -150,8 +150,34 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err = h.CustomerRepo.GetById(r.Context(), customerId)
+	var uniqueProviderIds []int
+	linq.From(quotes).Select(func(q interface{}) interface{} {
+		return q.(model.MarketQuote).MarketProviderId
+	}).Distinct().ToSlice(&uniqueProviderIds)
 
+	fmt.Println(uniqueProviderIds)
+
+	providerCurrencyConfigs := make(map[int]bool)
+	for _, uniqueProviderId := range uniqueProviderIds {
+		providerCurrencyConfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), uniqueProviderId, currencyPairId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		providerCurrencyConfigs[uniqueProviderId] = providerCurrencyConfig.IsEnabled
+	}
+
+	fmt.Println(providerCurrencyConfigs)
+
+	var filteredQuotes []model.MarketQuote
+	linq.From(quotes).Where(func(q interface{}) bool {
+		return providerCurrencyConfigs[q.(model.MarketQuote).MarketProviderId]
+	}).ToSlice(&filteredQuotes)
+
+	_, err = h.CustomerRepo.GetById(r.Context(), customerId)
+
+	fmt.Println(filteredQuotes)
 	// Get customer rating factor from customer ID
 	// Get currency mapping ID from query["base"] and query["quote"]
 	// Get all quotes with "quotes:{currencymappingid}"
