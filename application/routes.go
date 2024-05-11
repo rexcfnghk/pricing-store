@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/rexcfnghk/pricing-store/custommiddleware"
 	"github.com/rexcfnghk/pricing-store/handler"
 	"github.com/rexcfnghk/pricing-store/repository/currencypair"
 	"github.com/rexcfnghk/pricing-store/repository/customer"
@@ -63,6 +64,7 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 	router.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(a.tokenAuth))
 		r.Use(jwtauth.Authenticator(a.tokenAuth))
+		r.Use(custommiddleware.LogBestPrice)
 		r.Get("/bestprice", providerHandler.GetBestPrice)
 	})
 
