@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/rexcfnghk/pricing-store/model"
@@ -43,18 +42,36 @@ func (r *RedisRepo) Insert(ctx context.Context, quotes []model.MarketQuote) []er
 func (r *RedisRepo) GetAllByCurrencyPairId(ctx context.Context, currencyPairId int) ([]model.MarketQuote, error) {
 	key := quoteIdKey(currencyPairId)
 
-	value, err := r.Client.SMembers(ctx, key).Result()
+	values, err := r.Client.SMembers(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
-		return nil, errors.New("quotes do not exist")
+		return nil, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("get quotes: %w", err)
 	}
 
+	if noQuotes := len(values) == 0; noQuotes {
+		return nil, nil
+	}
+
 	var quotes []model.MarketQuote
-	err = json.Unmarshal([]byte(strings.Join(value, "")), &quotes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode currency pair json: %w", err)
+	for _, value := range values {
+		quote, err := mapToMarketQuote(value)
+		if err != nil {
+			return nil, fmt.Errorf("map json to quote failed: %w", err)
+		}
+
+		quotes = append(quotes, quote)
 	}
 
 	return quotes, nil
+}
+
+func mapToMarketQuote(value string) (model.MarketQuote, error) {
+	var quote model.MarketQuote
+	err := json.Unmarshal([]byte(value), &quote)
+	if err != nil {
+		return model.MarketQuote{}, fmt.Errorf("failed to decode market quote json: %w", err)
+	}
+
+	return quote, nil
 }

@@ -150,9 +150,7 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("%v", quotes)
-
-	//customer, err := h.CustomerRepo.GetById(r.Context(), customerId)
+	customer, err = h.CustomerRepo.GetById(r.Context(), customerId)
 
 	// Get customer rating factor from customer ID
 	// Get currency mapping ID from query["base"] and query["quote"]
