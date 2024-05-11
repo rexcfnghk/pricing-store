@@ -24,6 +24,7 @@ A simple implementation of a trade pricing store
 ## Assumptions
 
 - Provider IDs are known to the caller and are provided as URL parameters
+- Customer IDs are known to the caller and are provided as JWTs
 
 ## Things to improve on
 
