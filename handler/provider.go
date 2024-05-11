@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/model"
 	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
+	"github.com/rexcfnghk/pricing-store/repository/customer"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
 )
@@ -18,6 +19,7 @@ type Provider struct {
 	ProviderRepo               *provider.RedisRepo
 	CurrencyMappingRepo        *currencymapping.RedisRepo
 	ProviderCurrencyConfigRepo *providercurrencyconfig.RedisRepo
+	CustomerRepo               *customer.RedisRepo
 }
 
 func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *http.Request) {
