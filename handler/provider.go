@@ -118,5 +118,41 @@ func (h *Provider) PutCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 
 func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["sub"])))
+	customerId, err := strconv.Atoi(fmt.Sprintf("%s", claims["sub"]))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	base, quote := r.URL.Query().Get("base"), r.URL.Query().Get("quote")
+	if base == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if quote == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	customer, err := h.CustomerRepo.GetById(r.Context(), customerId)
+
+	var body model.ProviderCurrencyConfig
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Get customer rating factor from customer ID
+	// Get currency mapping ID from query["base"] and query["quote"]
+	// Get all quotes with "quotes:{currencymappingid}"
+	// Get all currency configs with quotes.DistinctBy(q => q.MarketProviderId)
+	// Filter quotes to only show active based on currency configs
+	// BEST PRICE = max bid price and min ask price
 }
