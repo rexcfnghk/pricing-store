@@ -28,7 +28,7 @@ A simple implementation of a trade pricing store
 
 ## Things to improve on
 
-- [ ] Add Postman scripts for easier testing
+- [x] Add Postman scripts for easier testing
 - [ ] Lack of tests
 - [ ] Code duplication in some areas
 - [ ] Lack of sufficient syntax knowledge to construct better abstractions and achieve inversion of control
