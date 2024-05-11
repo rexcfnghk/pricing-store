@@ -9,17 +9,19 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/model"
-	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
+	"github.com/rexcfnghk/pricing-store/repository/currencypair"
 	"github.com/rexcfnghk/pricing-store/repository/customer"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
+	"github.com/rexcfnghk/pricing-store/repository/quote"
 )
 
 type Provider struct {
 	ProviderRepo               *provider.RedisRepo
-	CurrencyMappingRepo        *currencymapping.RedisRepo
+	CurrencyPairRepo           *currencypair.RedisRepo
 	ProviderCurrencyConfigRepo *providercurrencyconfig.RedisRepo
 	CustomerRepo               *customer.RedisRepo
+	QuoteRepo                  *quote.RedisRepo
 }
 
 func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *http.Request) {
@@ -47,13 +49,13 @@ func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 		return
 	}
 
-	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	currencyPairId, err := h.CurrencyPairRepo.GetByCurrencyPairId(r.Context(), base, quote)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	providercurrencyconfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), marketProviderId, currencyMappingId)
+	providercurrencyconfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), marketProviderId, currencyPairId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -101,13 +103,13 @@ func (h *Provider) PutCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 		return
 	}
 
-	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	currencyPairId, err := h.CurrencyPairRepo.GetByCurrencyPairId(r.Context(), base, quote)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = h.ProviderCurrencyConfigRepo.UpdateById(r.Context(), marketProviderId, currencyMappingId, body)
+	err = h.ProviderCurrencyConfigRepo.UpdateById(r.Context(), marketProviderId, currencyPairId, body)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -135,19 +137,22 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.CustomerRepo.GetById(r.Context(), customerId)
-
-	var body model.ProviderCurrencyConfig
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	currencyPairId, err := h.CurrencyPairRepo.GetByCurrencyPairId(r.Context(), base, quote)
+	// TODO: Handle no quotes
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	quotes, err := h.QuoteRepo.GetAllByCurrencyPairId(r.Context(), currencyPairId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("%v", quotes)
+
+	//customer, err := h.CustomerRepo.GetById(r.Context(), customerId)
 
 	// Get customer rating factor from customer ID
 	// Get currency mapping ID from query["base"] and query["quote"]

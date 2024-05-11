@@ -1,4 +1,4 @@
-package currencymapping
+package currencypair
 
 import (
 	"context"

@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/rexcfnghk/pricing-store/handler"
-	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
+	"github.com/rexcfnghk/pricing-store/repository/currencypair"
 	"github.com/rexcfnghk/pricing-store/repository/customer"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
@@ -36,7 +36,7 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 	providerRedisRepo := &provider.RedisRepo{
 		Client: a.rdb,
 	}
-	currencyMappingRedisRepo := &currencymapping.RedisRepo{
+	currencyPairRedisRepo := &currencypair.RedisRepo{
 		Client: a.rdb,
 	}
 	providerCurrencyConfigRedisRepo := &providercurrencyconfig.RedisRepo{
@@ -47,16 +47,17 @@ func (a *App) loadProviderRoutes(router chi.Router) {
 	}
 
 	quoteHandler := &handler.Quote{
-		QuoteRepo:           quoteRedisRepo,
-		ProviderRepo:        providerRedisRepo,
-		CurrencyMappingRepo: currencyMappingRedisRepo,
+		QuoteRepo:        quoteRedisRepo,
+		ProviderRepo:     providerRedisRepo,
+		CurrencyPairRepo: currencyPairRedisRepo,
 	}
 
 	providerHandler := &handler.Provider{
 		ProviderRepo:               providerRedisRepo,
-		CurrencyMappingRepo:        currencyMappingRedisRepo,
+		CurrencyPairRepo:           currencyPairRedisRepo,
 		ProviderCurrencyConfigRepo: providerCurrencyConfigRedisRepo,
 		CustomerRepo:               customerRedisRepo,
+		QuoteRepo:                  quoteRedisRepo,
 	}
 
 	router.Group(func(r chi.Router) {

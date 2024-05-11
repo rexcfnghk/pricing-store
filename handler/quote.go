@@ -10,16 +10,16 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rexcfnghk/pricing-store/model"
-	"github.com/rexcfnghk/pricing-store/repository/currencymapping"
+	"github.com/rexcfnghk/pricing-store/repository/currencypair"
 	"github.com/rexcfnghk/pricing-store/repository/provider"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
 	"github.com/shopspring/decimal"
 )
 
 type Quote struct {
-	QuoteRepo           *quote.RedisRepo
-	ProviderRepo        *provider.RedisRepo
-	CurrencyMappingRepo *currencymapping.RedisRepo
+	QuoteRepo        *quote.RedisRepo
+	ProviderRepo     *provider.RedisRepo
+	CurrencyPairRepo *currencypair.RedisRepo
 }
 
 type QuoteBodyModel struct {
@@ -82,7 +82,7 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body QuoteBodyModel) (model.MarketQuote, error) {
-	currencyMappingId, err := h.CurrencyMappingRepo.GetByCurrencyPairId(ctx, body.Base, body.Quote)
+	currencyPairId, err := h.CurrencyPairRepo.GetByCurrencyPairId(ctx, body.Base, body.Quote)
 	if err != nil {
 		return model.MarketQuote{}, fmt.Errorf("get currency pair: %w", err)
 	}
@@ -92,7 +92,7 @@ func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body Quote
 		BidQuantity:      body.BidQuantity,
 		AskPrice:         body.AskPrice,
 		AskQuantity:      body.AskQuantity,
-		CurrencyPairId:   currencyMappingId,
+		CurrencyPairId:   currencyPairId,
 		Timestamp:        body.Timestamp,
 		MarketProviderId: marketProviderId,
 	}
