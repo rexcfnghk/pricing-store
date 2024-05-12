@@ -114,7 +114,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "BearereyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.kUnfTzVufuknQ1WI62MIR45LEEZH03ndjn1edWPokw8"
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.kUnfTzVufuknQ1WI62MIR45LEEZH03ndjn1edWPokw8"
 					}
 				],
 				"url": {

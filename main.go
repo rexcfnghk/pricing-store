@@ -31,7 +31,12 @@ func readAppConfig() *config.AppConfig {
 	if err != nil {
 		fmt.Println("failed to open config file", err)
 	}
-	defer confFile.Close()
+	defer func(confFile *os.File) {
+		err := confFile.Close()
+		if err != nil {
+			fmt.Println("failed to close config file", err)
+		}
+	}(confFile)
 	conf, err := io.ReadAll(confFile)
 	if err != nil {
 		fmt.Println("failed to read config file", err)

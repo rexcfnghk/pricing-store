@@ -55,26 +55,26 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 	var quotes []model.MarketQuote
 	var errs []error
 	for _, b := range body {
-		quote, err := h.mapToQuote(r.Context(), marketProviderId, b)
+		marketQuote, err := h.mapToQuote(r.Context(), marketProviderId, b)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
 
-		quotes = append(quotes, quote)
+		quotes = append(quotes, marketQuote)
 	}
 	if len(errs) > 0 {
-		fmt.Println("failed to map some quotes into curreny pairs: ", errs)
+		fmt.Println("failed to map some quotes into currency pairs: ", errs)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("failed to map some quotes into curreny pairs"))
+		w.Write([]byte("failed to map some quotes into currency pairs"))
 		return
 	}
 
 	errs = h.QuoteRepo.Insert(r.Context(), quotes)
 	if len(errs) > 0 {
-		fmt.Println("failed to insert some elemments: ", errs)
+		fmt.Println("failed to insert some elements: ", errs)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("failed to insert some elemments"))
+		w.Write([]byte("failed to insert some elements"))
 		return
 	}
 
@@ -87,7 +87,7 @@ func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body Quote
 		return model.MarketQuote{}, fmt.Errorf("get currency pair: %w", err)
 	}
 
-	quote := model.MarketQuote{
+	marketQuote := model.MarketQuote{
 		BidPrice:         body.BidPrice,
 		BidQuantity:      body.BidQuantity,
 		AskPrice:         body.AskPrice,
@@ -97,5 +97,5 @@ func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body Quote
 		MarketProviderId: marketProviderId,
 	}
 
-	return quote, nil
+	return marketQuote, nil
 }

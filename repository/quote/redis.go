@@ -19,11 +19,11 @@ func quoteIdKey(currencyPairId int) string {
 }
 
 func (r *RedisRepo) Insert(ctx context.Context, quotes []model.MarketQuote) []error {
-	var errors []error
+	var errs []error
 	for _, quote := range quotes {
 		data, err := json.Marshal(quote)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("failed to encode quote, %w", err))
+			errs = append(errs, fmt.Errorf("failed to encode quote, %w", err))
 			continue
 		}
 
@@ -31,12 +31,12 @@ func (r *RedisRepo) Insert(ctx context.Context, quotes []model.MarketQuote) []er
 
 		res := r.Client.SAdd(ctx, key, string(data))
 		if err := res.Err(); err != nil {
-			errors = append(errors, fmt.Errorf("failed to add to quote set: %w", err))
+			errs = append(errs, fmt.Errorf("failed to add to quote set: %w", err))
 			continue
 		}
 	}
 
-	return errors
+	return errs
 }
 
 func (r *RedisRepo) GetAllByCurrencyPairId(ctx context.Context, currencyPairId int) ([]model.MarketQuote, error) {

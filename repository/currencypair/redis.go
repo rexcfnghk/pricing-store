@@ -13,13 +13,13 @@ type RedisRepo struct {
 	Client *redis.Client
 }
 
-type CurrencyPairId = int
+type Id = int
 
 func currencyPairKey(base string, quote string) string {
 	return fmt.Sprintf("currencypairs:%s:%s", base, quote)
 }
 
-func (r *RedisRepo) GetByCurrencyPairId(ctx context.Context, base string, quote string) (CurrencyPairId, error) {
+func (r *RedisRepo) GetByCurrencyPairId(ctx context.Context, base string, quote string) (Id, error) {
 	key := currencyPairKey(base, quote)
 
 	value, err := r.Client.Get(ctx, key).Result()
@@ -29,11 +29,11 @@ func (r *RedisRepo) GetByCurrencyPairId(ctx context.Context, base string, quote 
 		return 0, fmt.Errorf("get currency pair: %w", err)
 	}
 
-	var currenyPairId CurrencyPairId
-	err = json.Unmarshal([]byte(value), &currenyPairId)
+	var currencyPairId Id
+	err = json.Unmarshal([]byte(value), &currencyPairId)
 	if err != nil {
 		return 0, fmt.Errorf("failed to decode currency pair json: %w", err)
 	}
 
-	return currenyPairId, nil
+	return currencyPairId, nil
 }

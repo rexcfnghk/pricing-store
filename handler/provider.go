@@ -53,21 +53,26 @@ func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 		return
 	}
 
-	providercurrencyconfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), marketProviderId, currencyPairId)
+	providerCurrencyConfig, err := h.ProviderCurrencyConfigRepo.GetById(r.Context(), marketProviderId, currencyPairId)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	res, err := json.Marshal(providercurrencyconfig)
+	res, err := json.Marshal(providerCurrencyConfig)
 	if err != nil {
 		fmt.Println("failed to marshal:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Write(res)
 	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(res)
+	if err != nil {
+		fmt.Println("failed to write response:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Provider) PutCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *http.Request) {
