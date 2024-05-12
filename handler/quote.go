@@ -63,6 +63,7 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 
 		quotes = append(quotes, marketQuote)
 	}
+
 	if len(errs) > 0 {
 		fmt.Println("failed to map some quotes into currency pairs: ", errs)
 		w.WriteHeader(http.StatusOK)

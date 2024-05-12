@@ -146,6 +146,10 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = h.BestPriceService.GetBestPrice(r.Context(), currencyPair, customerId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// TODO: Add response
 }

@@ -20,6 +20,11 @@ type BestPriceService struct {
 }
 
 func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model.CurrencyPair, customerId int) (model.BestPrice, error) {
+	_, err := s.CustomerRepo.GetById(ctx, customerId)
+	if err != nil {
+		return model.BestPrice{}, fmt.Errorf("unable to retrieve customer: %w", err)
+	}
+
 	currencyPairId, err := s.CurrencyPairRepo.GetByCurrencyPairId(ctx, currencyPair.Base, currencyPair.Quote)
 	if err != nil {
 		return model.BestPrice{}, fmt.Errorf("unable to retrieve currency pair: %w", err)
@@ -53,8 +58,6 @@ func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model
 	linq.From(quotes).Where(func(q interface{}) bool {
 		return providerCurrencyConfigs[q.(model.MarketQuote).MarketProviderId]
 	}).ToSlice(&filteredQuotes)
-
-	_, err = s.CustomerRepo.GetById(ctx, customerId)
 
 	fmt.Println(filteredQuotes)
 
