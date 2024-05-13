@@ -19,25 +19,20 @@ type BestPriceService struct {
 	QuoteRepo                  *quote.RedisRepo
 }
 
-func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model.CurrencyPair, customerId int) (model.BestPrice, error) {
-	_, err := s.CustomerRepo.GetById(ctx, customerId)
-	if err != nil {
-		return model.BestPrice{}, fmt.Errorf("unable to retrieve customer: %w", err)
-	}
-
+func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model.CurrencyPair) (*model.BestPrice, error) {
 	currencyPairId, err := s.CurrencyPairRepo.GetByCurrencyPairId(ctx, currencyPair.Base, currencyPair.Quote)
 	if err != nil {
-		return model.BestPrice{}, fmt.Errorf("unable to retrieve currency pair: %w", err)
+		return &model.BestPrice{}, fmt.Errorf("unable to retrieve currency pair: %w", err)
 	}
 
 	quotes, err := s.QuoteRepo.GetAllByCurrencyPairId(ctx, currencyPairId)
 	if err != nil {
-		return model.BestPrice{}, fmt.Errorf("unable to retrieve quotes: %w", err)
+		return &model.BestPrice{}, fmt.Errorf("unable to retrieve quotes: %w", err)
 	}
 
 	providerCurrencyConfigs, err := s.getProviderCurrencyConfigs(ctx, quotes, currencyPairId)
 	if err != nil {
-		return model.BestPrice{}, fmt.Errorf("unable to retrieve provider currency configs: %w", err)
+		return &model.BestPrice{}, fmt.Errorf("unable to retrieve provider currency configs: %w", err)
 	}
 
 	fmt.Println(providerCurrencyConfigs)
@@ -54,7 +49,7 @@ func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model
 		return item.AskPrice.Compare(min.AskPrice) < 0
 	})
 
-	return model.BestPrice{
+	return &model.BestPrice{
 		BidPrice:                maxBidPriceQuote.BidPrice,
 		BidQuantity:             maxBidPriceQuote.BidQuantity,
 		AskPrice:                minAskPriceQuote.AskPrice,

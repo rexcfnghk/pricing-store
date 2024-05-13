@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rexcfnghk/pricing-store/repository/customer"
 	"net/http"
 	"strconv"
 
@@ -19,6 +20,7 @@ type Provider struct {
 	ProviderRepo               *provider.RedisRepo
 	CurrencyPairRepo           *currencypair.RedisRepo
 	ProviderCurrencyConfigRepo *providercurrencyconfig.RedisRepo
+	CustomerRepo               *customer.RedisRepo
 	BestPriceService           *service.BestPriceService
 }
 
@@ -140,20 +142,27 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c, err := h.CustomerRepo.GetById(r.Context(), customerId)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	currencyPair := &model.CurrencyPair{
 		Base:  base,
 		Quote: quote,
 	}
 
-	bestPrice, err := h.BestPriceService.GetBestPrice(r.Context(), currencyPair, customerId)
+	bestPrice, err := h.BestPriceService.GetBestPrice(r.Context(), currencyPair)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	// TODO: Add response
-	res, err := json.Marshal(bestPrice)
+	adjustedBestPrice := adjustBestPrice(c, bestPrice)
+
+	res, err := json.Marshal(&adjustedBestPrice)
 	if err != nil {
 		fmt.Println("failed to marshal:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -169,4 +178,15 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
+}
+
+func adjustBestPrice(customer *model.Customer, price *model.BestPrice) *model.BestPrice {
+	return &model.BestPrice{
+		BidPrice:                price.BidPrice,
+		BidQuantity:             customer.RatingFactor.Mul(price.BidQuantity),
+		AskPrice:                price.AskPrice,
+		AskQuantity:             customer.RatingFactor.Mul(price.AskQuantity),
+		BestBidMarketProviderId: price.BestBidMarketProviderId,
+		BestAskMarketProviderId: price.BestAskMarketProviderId,
+	}
 }

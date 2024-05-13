@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ahmetb/go-linq/v3"
+	"github.com/rexcfnghk/pricing-store/service"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,6 +22,7 @@ type Quote struct {
 	QuoteRepo        *quote.RedisRepo
 	ProviderRepo     *provider.RedisRepo
 	CurrencyPairRepo *currencypair.RedisRepo
+	BestPriceService *service.BestPriceService
 }
 
 type QuoteBodyModel struct {
@@ -79,7 +82,36 @@ func (h *Quote) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.recalculateBestPrices(r, body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *Quote) recalculateBestPrices(r *http.Request, body []QuoteBodyModel) error {
+	var uniqueCurrencyPairs []*model.CurrencyPair
+	linq.From(body).Select(func(quote interface{}) interface{} {
+		return &model.CurrencyPair{
+			Base:  quote.(QuoteBodyModel).Base,
+			Quote: quote.(QuoteBodyModel).Quote,
+		}
+	}).Distinct().ToSlice(&uniqueCurrencyPairs)
+
+	var bestPrices []model.BestPrice
+	for _, uniqueCurrencyPair := range uniqueCurrencyPairs {
+		bestPrice, err := h.BestPriceService.GetBestPrice(r.Context(), uniqueCurrencyPair)
+		if err != nil {
+			return fmt.Errorf("error getting best price %w", err)
+		}
+
+		bestPrices = append(bestPrices, *bestPrice)
+	}
+
+	fmt.Printf("Best prices recalculated: %+v", bestPrices)
+	return nil
 }
 
 func (h *Quote) mapToQuote(ctx context.Context, marketProviderId int, body QuoteBodyModel) (model.MarketQuote, error) {
