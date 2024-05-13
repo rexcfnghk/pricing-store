@@ -1,4 +1,4 @@
-# Pricing store
+# Pricing store ![CI Build](https://github.com/github/docs/actions/workflows/go.yml/badge.svg)
 
 ## Overview
 
