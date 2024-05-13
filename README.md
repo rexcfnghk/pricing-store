@@ -25,6 +25,10 @@ A simple implementation of a trade pricing store
 - Provider IDs are known to the caller and are provided as URL parameters
 - Customer IDs are known to the caller and are provided as JWTs
 
+## Seed data
+
+`docker compose up` defaults to seeding the Redis instance with data located under `seed-data/seed.redis`. Seed data can be modified by updating the contents of this file.
+
 ## Things to improve on
 
 - [x] Add Postman scripts for easier testing
