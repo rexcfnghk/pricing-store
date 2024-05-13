@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"fmt"
-
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/rexcfnghk/pricing-store/model"
 	"github.com/rexcfnghk/pricing-store/repository/currencypair"
 	"github.com/rexcfnghk/pricing-store/repository/customer"
 	"github.com/rexcfnghk/pricing-store/repository/providercurrencyconfig"
 	"github.com/rexcfnghk/pricing-store/repository/quote"
+	"github.com/samber/lo"
 )
 
 type BestPriceService struct {
@@ -46,8 +46,22 @@ func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model
 
 	fmt.Println(filteredQuotes)
 
-	// TODO: fix response
-	return model.BestPrice{}, nil
+	maxBidPriceQuote := lo.MaxBy[model.MarketQuote](filteredQuotes, func(item model.MarketQuote, max model.MarketQuote) bool {
+		return item.BidPrice.Compare(max.BidPrice) > 0
+	})
+
+	minAskPriceQuote := lo.MinBy[model.MarketQuote](filteredQuotes, func(item model.MarketQuote, min model.MarketQuote) bool {
+		return item.AskPrice.Compare(min.AskPrice) < 0
+	})
+
+	return model.BestPrice{
+		BidPrice:                maxBidPriceQuote.BidPrice,
+		BidQuantity:             maxBidPriceQuote.BidQuantity,
+		AskPrice:                minAskPriceQuote.AskPrice,
+		AskQuantity:             minAskPriceQuote.AskQuantity,
+		BestBidMarketProviderId: maxBidPriceQuote.MarketProviderId,
+		BestAskMarketProviderId: minAskPriceQuote.MarketProviderId,
+	}, nil
 
 	// Get customer rating factor from customer ID
 	// Get currency mapping ID from query["base"] and query["quote"]

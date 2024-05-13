@@ -145,11 +145,28 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		Quote: quote,
 	}
 
-	_, err = h.BestPriceService.GetBestPrice(r.Context(), currencyPair, customerId)
+	bestPrice, err := h.BestPriceService.GetBestPrice(r.Context(), currencyPair, customerId)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	// TODO: Add response
+	res, err := json.Marshal(bestPrice)
+	if err != nil {
+		fmt.Println("failed to marshal:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(res)
+	if err != nil {
+		fmt.Println("failed to write response:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+
 }

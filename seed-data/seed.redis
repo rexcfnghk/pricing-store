@@ -6,6 +6,8 @@ SET currencypairs:USD:BTC 2
 
 SET providercurrencyconfigs:1:1 '{"isEnabled":true}'
 SET providercurrencyconfigs:1:2 '{"isEnabled":false}'
+SET providercurrencyconfigs:2:1 '{"isEnabled":true}'
+SET providercurrencyconfigs:2:2 '{"isEnabled":true}'
 
 SET customers:1 '{"ratingFactor":0.8}'
 SET customers:2 '{"ratingFactor":1.2}'
