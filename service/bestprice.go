@@ -35,29 +35,14 @@ func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model
 		return model.BestPrice{}, fmt.Errorf("unable to retrieve quotes: %w", err)
 	}
 
-	var uniqueProviderIds []int
-	linq.From(quotes).Select(func(q interface{}) interface{} {
-		return q.(model.MarketQuote).MarketProviderId
-	}).Distinct().ToSlice(&uniqueProviderIds)
-
-	fmt.Println(uniqueProviderIds)
-
-	providerCurrencyConfigs := make(map[int]bool)
-	for _, uniqueProviderId := range uniqueProviderIds {
-		providerCurrencyConfig, err := s.ProviderCurrencyConfigRepo.GetById(ctx, uniqueProviderId, currencyPairId)
-		if err != nil {
-			return model.BestPrice{}, fmt.Errorf("unable to retrieve provider currency config: %w", err)
-		}
-
-		providerCurrencyConfigs[uniqueProviderId] = providerCurrencyConfig.IsEnabled
+	providerCurrencyConfigs, err := s.getProviderCurrencyConfigs(ctx, quotes, currencyPairId)
+	if err != nil {
+		return model.BestPrice{}, fmt.Errorf("unable to retrieve provider currency configs: %w", err)
 	}
 
 	fmt.Println(providerCurrencyConfigs)
 
-	var filteredQuotes []model.MarketQuote
-	linq.From(quotes).Where(func(q interface{}) bool {
-		return providerCurrencyConfigs[q.(model.MarketQuote).MarketProviderId]
-	}).ToSlice(&filteredQuotes)
+	filteredQuotes := s.getFilteredQuotes(quotes, providerCurrencyConfigs)
 
 	fmt.Println(filteredQuotes)
 
@@ -70,4 +55,34 @@ func (s *BestPriceService) GetBestPrice(ctx context.Context, currencyPair *model
 	// Get all currency configs with quotes.DistinctBy(q => q.MarketProviderId)
 	// Filter quotes to only show active based on currency configs
 	// BEST PRICE = max bid price and min ask price
+}
+
+func (s *BestPriceService) getFilteredQuotes(quotes []model.MarketQuote, providerCurrencyConfigs map[int]bool) []model.MarketQuote {
+	var filteredQuotes []model.MarketQuote
+	linq.From(quotes).Where(func(q interface{}) bool {
+		return providerCurrencyConfigs[q.(model.MarketQuote).MarketProviderId]
+	}).ToSlice(&filteredQuotes)
+
+	return filteredQuotes
+}
+
+func (s *BestPriceService) getProviderCurrencyConfigs(ctx context.Context, quotes []model.MarketQuote, currencyPairId currencypair.Id) (map[int]bool, error) {
+	var uniqueProviderIds []int
+	linq.From(quotes).Select(func(q interface{}) interface{} {
+		return q.(model.MarketQuote).MarketProviderId
+	}).Distinct().ToSlice(&uniqueProviderIds)
+
+	fmt.Println(uniqueProviderIds)
+
+	providerCurrencyConfigs := make(map[int]bool)
+	for _, uniqueProviderId := range uniqueProviderIds {
+		providerCurrencyConfig, err := s.ProviderCurrencyConfigRepo.GetById(ctx, uniqueProviderId, currencyPairId)
+		if err != nil {
+			return nil, fmt.Errorf("unable to retrieve provider currency config: %w", err)
+		}
+
+		providerCurrencyConfigs[uniqueProviderId] = providerCurrencyConfig.IsEnabled
+	}
+
+	return providerCurrencyConfigs, nil
 }
