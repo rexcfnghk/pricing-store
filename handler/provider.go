@@ -170,6 +170,7 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(res)
 	if err != nil {
 		fmt.Println("failed to write response:", err)
@@ -177,7 +178,6 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
