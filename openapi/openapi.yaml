@@ -1,0 +1,176 @@
+﻿openapi: 3.1.0
+info:
+  title: A pricing store implementation in Go
+  version: 0.0.1
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /providers/{providerId}/quotes:
+    post:
+      summary: Post new market quotes
+      description: Inserts new market quotes into the pricing store
+      parameters:
+      - name: providerId
+        in: path
+        required: true
+        schema:
+          - type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  base:
+                    type: string
+                    description: The currency code for the base currency
+                  quote:
+                    type: string
+                    description: The currency code for the quote currency
+                  bidPrice:
+                    type: number
+                    description: The bid price of the currency
+                  bidQuantity:
+                    type: number
+                    description: The bid quantity of the currency
+                  askPrice:
+                    type: number
+                    description: The ask price of the currency
+                  askQuantity:
+                    type: number
+                    description: The ask quantity of the currency
+                  timestamp:
+                    type: string
+                    description: Timestamp of the quote
+      responses:
+        "201":
+          description: "Created"
+        "400":
+          description: "Bad Request"
+        "500":
+          description: "Internal Server Error"
+  /providers/bestprice:
+    get:
+      summary: Get the best price among all available provdiers
+      description: Inserts new market quotes into the pricing store
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: base
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: quote
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bidPrice:
+                    type: number
+                    description: The best bid price of the currency
+                  bidQuantity:
+                    type: number
+                    description: The best bid quantity of the currency
+                  askPrice:
+                    type: number
+                    description: The best ask price of the currency
+                  askQuantity:
+                    type: number
+                    description: The best ask quantity of the currency
+                  bestBidMarketProviderId:
+                    type: number
+                    description: The market provider which provided the best bid price
+                  bestAskMarketProviderId:
+                    type: number
+                    description: The market provider which provided the best ask price
+        "400":
+          description: "Bad Request"
+        "401":
+          description: "Unauthorized"
+        "500":
+          description: "Internal Server Error"
+  /providers/{providerId}/providercurrencyconfigs:
+    get:
+      summary: Get the provider-currency config for the specified market provider ID
+      parameters:
+        - name: providerId
+          in: path
+          required: true
+          schema:
+            - type: integer
+        - name: base
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: quote
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    type: boolean
+                    description: Describes whether the given currency pair is enabled for best price calculation for the given market provider
+        "400":
+          description: "Bad request"
+        "500":
+          description: "Internal server error"
+    put:
+      summary: Update the provider-currency config for the specified market provider ID
+      parameters:
+        - name: providerId
+          in: path
+          required: true
+          schema:
+            - type: integer
+        - name: base
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: quote
+          in: query
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isEnabled:
+                  type: boolean
+                  description: Describes whether the given currency pair is enabled for best price calculation for the given market provider
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad request"
+        "500":
+          description: "Internal server error"

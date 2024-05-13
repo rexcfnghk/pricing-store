@@ -20,3 +20,13 @@ services:
     volumes:
       - ./seed-data/:/seed-data:ro
     command: sh -c 'redis-cli -h redis -p 6379 < /seed-data/seed.redis'
+  swagger-ui:
+    image: "swaggerapi/swagger-ui"
+    depends_on:
+      - redis-seed
+    volumes:
+      - ./openapi/:/openapi:ro
+    ports:
+      - "80:8080"
+    environment:
+      SWAGGER_JSON: /openapi/openapi.yaml
