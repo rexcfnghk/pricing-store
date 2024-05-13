@@ -68,6 +68,7 @@ func (h *Provider) GetCurrencyConfigByCurrencyPair(w http.ResponseWriter, r *htt
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(res)
 	if err != nil {
@@ -176,8 +177,8 @@ func (h *Provider) GetBestPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func adjustBestPrice(customer *model.Customer, price *model.BestPrice) *model.BestPrice {

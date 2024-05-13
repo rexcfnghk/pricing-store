@@ -17,7 +17,7 @@ A simple implementation of a trade pricing store
 - [x] `POST /providers/{id}/quotes` Inserts quote prices into the system for a provider
 - [x] `GET /providers/{id}/currencyconfigs?base={baseCurrency}&quote={quoteCurrency}` Retrieves currency pair setting for a provider
 - [x] `PUT /providers/{id}/currencyconfigs?base={baseCurrency}&quote={quoteCurrency}` Updates currency pair setting for a provider
-- [ ] `GET /providers/bestprice?base={baseCurrency}&quote={quoteCurrency}&bidQuantity={bidQuantity}` Get best price among all available providers for a given currency pair and bid quantity
+- [x] `GET /providers/bestprice?base={baseCurrency}&quote={quoteCurrency}&bidQuantity={bidQuantity}` Get best price among all available providers for a given currency pair and bid quantity
   - Requires a JWT with a payload `{ "sub": {customerId} }`
 
 ## Assumptions
