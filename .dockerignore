@@ -1,0 +1,8 @@
+﻿.git*
+.gitignore
+.idea*
+compose.yml
+Dockerfile
+.dockerignore
+README.md
+postman-scripts*
