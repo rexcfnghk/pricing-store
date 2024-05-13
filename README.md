@@ -10,7 +10,11 @@ A simple implementation of a trade pricing store
 
 ## Installation for local development
 
-1. `docker compose up` (this builds and deploys up a local Redis container and the pricing store API container)
+1. `docker compose up`
+   - This builds and deploys
+      - A Redis container hosted on port `6379`
+      - The pricing API hosted on port `3000`
+      - A Swagger UI hosted on port `80`
 
 ## Endpoints exposed
 
@@ -19,6 +23,8 @@ A simple implementation of a trade pricing store
 - [x] `PUT /providers/{id}/currencyconfigs?base={baseCurrency}&quote={quoteCurrency}` Updates currency pair setting for a provider
 - [x] `GET /providers/bestprice?base={baseCurrency}&quote={quoteCurrency}` Get best price among all available providers for a given currency pair
   - Requires a JWT with a payload `{ "sub": {customerId} }`
+
+The endpoints can also be visualised by visiting the Swagger UI generated from `openapi/openapi.yaml`
 
 ## Assumptions
 
