@@ -59,7 +59,7 @@ paths:
           description: "Internal Server Error"
   /providers/bestprice:
     get:
-      summary: Get the best price among all available provdiers
+      summary: Get the best price among all available providers
       description: Inserts new market quotes into the pricing store
       security:
         - bearerAuth: []
