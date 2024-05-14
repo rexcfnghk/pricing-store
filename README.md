@@ -39,5 +39,6 @@ The endpoints can also be visualised by visiting the Swagger UI generated from `
 
 - [x] Add Postman scripts for easier testing
 - [ ] Lack of tests
+  - Due to a lack of time, only one simple unit test is added under `repository/customer/redis_test.go` to demonstrate a unit test written in Go
 - [ ] Code duplication in some areas
 - [ ] Lack of sufficient syntax knowledge to construct better abstractions and achieve inversion of control
